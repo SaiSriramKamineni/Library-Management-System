@@ -6,39 +6,57 @@
 
 using namespace std;
 
-// Base class
+// Base class representing a generic User
 class User {
 protected:
     int userID;
     string name;
     string email;
 public:
+    // Constructor to initialize user properties
     User(int id, string n, string e) : userID(id), name(n), email(e) {}
+
+    // Virtual function to login the user
     virtual void login() {
         cout << name << " logged in." << endl;
     }
+
+    // Virtual function to logout the user
     virtual void logout() {
         cout << name << " logged out." << endl;
     }
+
+    // Virtual function to display user information
     virtual void displayInfo() {
         cout << "UserID: " << userID << ", Name: " << name << ", Email: " << email << endl;
     }
+
+    // Getter for the user's name
     string getName() const {
         return name;
     }
-    virtual void showMenu() = 0; // Pure virtual function to show the menu
+
+    // Pure virtual function to show the menu
+    virtual void showMenu() = 0;
 };
 
-// Derived class Admin
+// Derived class representing an Admin user
 class Admin : public User {
 public:
+    // Constructor to initialize admin properties
     Admin(int id, string n, string e) : User(id, n, e) {}
+
+    // Function to add a book to the library
     void addBook(string title, string author, string genre) {
         cout << "Book added by Admin: Title: " << title << ", Author: " << author << ", Genre: " << genre << endl;
     }
+
+    // Function to remove a book from the library
     void removeBook() {
         cout << "Book removed by Admin." << endl;
     }
+
+    // Override function to show admin-specific menu
     void showMenu() override {
         cout << "\nAdmin Menu:\n";
         cout << "1. Add Book\n";
@@ -50,16 +68,21 @@ public:
     }
 };
 
-// Derived class Member
+// Derived class representing a Member user
 class Member : public User {
 private:
-    vector<int> borrowedBooks;
+    vector<int> borrowedBooks; // List of borrowed book IDs
 public:
+    // Constructor to initialize member properties
     Member(int id, string n, string e) : User(id, n, e) {}
+
+    // Function to borrow a book
     void borrowBook(int bookID) {
         borrowedBooks.push_back(bookID);
         cout << "Book borrowed: " << bookID << endl;
     }
+
+    // Function to return a borrowed book
     void returnBook(int bookID) {
         auto it = find(borrowedBooks.begin(), borrowedBooks.end(), bookID);
         if (it != borrowedBooks.end()) {
@@ -69,6 +92,8 @@ public:
             cout << "Book not found in borrowed list." << endl;
         }
     }
+
+    // Function to show the list of borrowed books
     void showBorrowedBooks() {
         cout << "Borrowed Books: ";
         for (int id : borrowedBooks) {
@@ -76,6 +101,8 @@ public:
         }
         cout << endl;
     }
+
+    // Override function to show member-specific menu
     void showMenu() override {
         cout << "\nMember Menu:\n";
         cout << "1. Borrow Book\n";
@@ -88,7 +115,7 @@ public:
     }
 };
 
-// Book class
+// Class representing a Book
 class Book {
 private:
     int bookID;
@@ -97,53 +124,72 @@ private:
     string genre;
     bool isBorrowed;
 public:
+    // Constructor to initialize book properties
     Book(int id, string t, string a, string g) : bookID(id), title(t), author(a), genre(g), isBorrowed(false) {}
+
+    // Function to mark the book as borrowed
     void borrowBook() {
         isBorrowed = true;
         cout << "Book borrowed: " << title << endl;
     }
+
+    // Function to mark the book as returned
     void returnBook() {
         isBorrowed = false;
         cout << "Book returned: " << title << endl;
     }
+
+    // Function to display book information
     void displayInfo() const {
         cout << "BookID: " << bookID << ", Title: " << title << ", Author: " << author << ", Genre: " << genre << endl;
     }
+
+    // Getter for the book's title
     string getTitle() const {
         return title;
     }
+
+    // Getter for the book's ID
     int getID() const {
         return bookID;
     }
+
+    // Getter for the book's borrowed status
     bool getStatus() const {
         return isBorrowed;
     }
+
+    // Setter for the book's borrowed status
     void setStatus(bool status) {
         isBorrowed = status;
     }
 };
 
-// Library class
+// Class representing the Library
 class Library {
 private:
-    vector<Book> books;
-    vector<User*> users;
+    vector<Book> books; // List of books in the library
+    vector<User*> users; // List of users in the library
     int nextUserID = 1;
     int nextBookID = 1;
 
+    // Function to generate the next user ID
     int getNextUserID() {
         return nextUserID++;
     }
 
+    // Function to generate the next book ID
     int getNextBookID() {
         return nextBookID++;
     }
 
 public:
+    // Function to add a book to the library
     void addBook(string title, string author, string genre) {
         books.emplace_back(getNextBookID(), title, author, genre);
-        // cout << "Book added to library: " << title << endl; // Hide book addition messages
     }
+
+    // Function to remove a book from the library
     void removeBook(int bookID) {
         auto it = find_if(books.begin(), books.end(), [bookID](Book& b) { return b.getID() == bookID; });
         if (it != books.end()) {
@@ -153,10 +199,13 @@ public:
             cout << "Book not found." << endl;
         }
     }
+
+    // Function to register a new user in the library
     void registerUser(User* u) {
         users.push_back(u);
-        
     }
+
+    // Function to borrow a book for a member
     void borrowBook(int bookID, Member* member) {
         auto it = find_if(books.begin(), books.end(), [bookID](Book& b) { return b.getID() == bookID && !b.getStatus(); });
         if (it != books.end()) {
@@ -166,6 +215,8 @@ public:
             cout << "Book not available." << endl;
         }
     }
+
+    // Function to return a book for a member
     void returnBook(int bookID, Member* member) {
         auto it = find_if(books.begin(), books.end(), [bookID](Book& b) { return b.getID() == bookID && b.getStatus(); });
         if (it != books.end()) {
@@ -175,12 +226,16 @@ public:
             cout << "Book not found or not borrowed." << endl;
         }
     }
+
+    // Function to display all books in the library
     void displayBooks() const {
         cout << "All Books:\n";
         for (const Book& b : books) {
             b.displayInfo();
         }
     }
+
+    // Function to display available (not borrowed) books in the library
     void displayAvailableBooks() const {
         cout << "Available Books:\n";
         for (const Book& b : books) {
@@ -189,6 +244,8 @@ public:
             }
         }
     }
+
+    // Function to login a user by name
     User* login(string name) {
         for (User* u : users) {
             if (u->getName() == name) {
@@ -198,6 +255,8 @@ public:
         }
         return nullptr;
     }
+
+    // Function to register a new user via console input
     void registerNewUser() {
         int userType;
         string name, email;
@@ -220,7 +279,7 @@ public:
         }
     }
 
-    // Clean up dynamically allocated memory
+    // Destructor to clean up dynamically allocated memory
     ~Library() {
         for (User* u : users) {
             delete u;
@@ -288,6 +347,7 @@ int main() {
                     int option;
                     cin >> option;
 
+                    // Handle Admin actions
                     if (Admin* admin = dynamic_cast<Admin*>(currentUser)) {
                         switch (option) {
                         case 1: {
@@ -322,6 +382,7 @@ int main() {
                         default:
                             cout << "Invalid option. Try again." << endl;
                         }
+                    // Handle Member actions
                     } else if (Member* member = dynamic_cast<Member*>(currentUser)) {
                         switch (option) {
                         case 1: {
